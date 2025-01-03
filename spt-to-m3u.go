@@ -51,14 +51,19 @@ https://open.spotify.com/playlist/39y5RxyW8k8r24onnewuNMn
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Printf("\nAuthenticated with user credentials %s...", token)
+			fmt.Println("\nAuthenticated with user credentials Successfully...")
 
 			body, err := spotify.GetPlaylistData(id, token)
 			if err != nil {
 				log.Fatal(err)
 			}
 			songs := spotify.GetSongsList(*body)
-			fmt.Printf("\n\nPlaylist found %s...", songs)
+			fmt.Printf("\nPlaylist found: %s\n", body.Name)
+
+			for i, pair := range songs {
+				fmt.Printf("\n[%d] %s - %s", i+1, pair.Author, pair.Song)
+			}
+
 			return nil
 		},
 	}

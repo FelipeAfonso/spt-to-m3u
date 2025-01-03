@@ -1,8 +1,7 @@
 package spotify
 
 type SimpleSongAuthorPair struct {
-	Song   string
-	Author string
+	Song, Author string
 }
 
 type AccessTokenResponse struct {
