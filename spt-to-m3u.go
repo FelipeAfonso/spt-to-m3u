@@ -57,7 +57,8 @@ https://open.spotify.com/playlist/39y5RxyW8k8r24onnewuNMn
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Printf("\n\nPlaylist found %s...", body)
+			songs := spotify.GetSongsList(*body)
+			fmt.Printf("\n\nPlaylist found %s...", songs)
 			return nil
 		},
 	}

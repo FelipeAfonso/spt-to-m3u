@@ -1,5 +1,10 @@
 package spotify
 
+type SimpleSongAuthorPair struct {
+	Song   string
+	Author string
+}
+
 type AccessTokenResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
