@@ -19,9 +19,12 @@ func GetSongsList(data PlaylistResponse) []SimpleSongAuthorPair {
 }
 
 func SafePlaylistName(data PlaylistResponse) string {
-	trimmed := strings.Trim(data.Name, " ")
-	spaceless := strings.ReplaceAll(trimmed, " ", "_")
-	lowercase := strings.ToLower(spaceless)
-	safe := strings.ReplaceAll(lowercase, ".", "")
-	return fmt.Sprintf("%s.m3u", safe)
+	playlist := strings.Trim(data.Name, " ")
+	playlist = strings.ReplaceAll(playlist, " ", "_")
+	playlist = strings.ToLower(playlist)
+	playlist = strings.ReplaceAll(playlist, ".", "")
+	playlist = strings.ReplaceAll(playlist, ",", "_")
+	playlist = strings.ReplaceAll(playlist, "/", "_")
+	playlist = strings.ReplaceAll(playlist, "__", "_")
+	return fmt.Sprintf("%s.m3u", playlist)
 }

@@ -59,12 +59,25 @@ https://open.spotify.com/playlist/39y5RxyW8k8r24onnewuNMn
 			}
 			fmt.Println("\nAuthenticated with user credentials Successfully...")
 
-			body, err := spotify.GetPlaylistData(id, token)
+			data, err := spotify.GetPlaylistData(id, token)
 			if err != nil {
 				log.Fatal(err)
 			}
-			songs := spotify.GetSongsList(*body)
-			fmt.Printf("\nPlaylist found: %s\nStarted Matching Songs:\n", body.Name)
+			songs := spotify.GetSongsList(*data)
+			fmt.Printf("\nPlaylist found: %s", data.Name)
+
+			playlist := spotify.SafePlaylistName(*data)
+			f, err := os.Create(playlist)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer f.Close()
+
+			_, err = f.WriteString("#EXTM3U\n")
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("\nCreating File: %s", playlist)
 
 			for i, pair := range songs {
 				matched, err := library.FindSong(path, pair)
@@ -74,6 +87,10 @@ https://open.spotify.com/playlist/39y5RxyW8k8r24onnewuNMn
 				status := ""
 				if matched != "" {
 					status = "~ MATCHED"
+					_, err = f.WriteString(fmt.Sprintf("%s\n", matched))
+					if err != nil {
+						log.Fatal(err)
+					}
 				}
 				fmt.Printf("\n[%d] %s - %s %s", i+1, pair.Author, pair.Song, status)
 			}
