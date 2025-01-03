@@ -3,17 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/urfave/cli/v3"
 	"log"
 	"os"
+	"spt-to-m3u/library"
 	"spt-to-m3u/spotify"
+
+	"github.com/urfave/cli/v3"
 )
 
 func main() {
-	// 	cli.RootCommandHelpTemplate = fmt.Sprintf(`%s
-	// WEBSITE: http://awesometown.example.com
-	// `, cli.RootCommandHelpTemplate)
-
 	cmd := &cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -28,10 +26,16 @@ func main() {
 				Required: true,
 				Usage:    "Client Secret taken from your developer dashboard",
 			},
+			&cli.StringFlag{
+				Name:    "path",
+				Aliases: []string{"p"},
+				Value:   "./",
+				Usage:   "Path to local library if not CWD",
+			},
 		},
 		Usage:     "Import your spotify playlists into your local library.",
 		ArgsUsage: "SPOTIFY_PLAYLIST_ID",
-		UsageText: "spt-to-m3u -c YOUR_CLIENT_ID -s YOUR_CLIENT_SECRET SPOTIFY_PLAYLIST_ID",
+		UsageText: "spt-to-m3u -c YOUR_CLIENT_ID -s YOUR_CLIENT_SECRET [-p PATH_TO_LIB] SPOTIFY_PLAYLIST_ID",
 		Description: `You can get your SPOTIFY_PLAYLIST_ID by inspecting 
 the playlist URL (Either by opening in your browser, 
 or checking the share link's URL). It should be the 
@@ -46,6 +50,8 @@ https://open.spotify.com/playlist/39y5RxyW8k8r24onnewuNMn
 			id := cmd.Args().First()
 			client_id := cmd.String("client_id")
 			client_secret := cmd.String("client_secret")
+			path := cmd.String("path")
+
 			fmt.Printf("\nAuthenticating to look for Playlist %s...", id)
 			token, err := spotify.AuthenticateWithClientSecret(client_id, client_secret)
 			if err != nil {
@@ -58,10 +64,18 @@ https://open.spotify.com/playlist/39y5RxyW8k8r24onnewuNMn
 				log.Fatal(err)
 			}
 			songs := spotify.GetSongsList(*body)
-			fmt.Printf("\nPlaylist found: %s\n", body.Name)
+			fmt.Printf("\nPlaylist found: %s\nStarted Matching Songs:\n", body.Name)
 
 			for i, pair := range songs {
-				fmt.Printf("\n[%d] %s - %s", i+1, pair.Author, pair.Song)
+				matched, err := library.FindSong(path, pair)
+				if err != nil {
+					log.Fatal(err)
+				}
+				status := ""
+				if matched != "" {
+					status = "~ MATCHED"
+				}
+				fmt.Printf("\n[%d] %s - %s %s", i+1, pair.Author, pair.Song, status)
 			}
 
 			return nil
